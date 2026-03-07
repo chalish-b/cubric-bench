@@ -1,5 +1,27 @@
 import { describe, it, expect } from "vitest";
-import { parseMove, Cube, Color, getDefaultState } from "./cube";
+import {
+  parseMove,
+  parseAlgorithm,
+  invertMove,
+  invertAlgorithm,
+  Cube,
+  Color,
+  getDefaultState,
+} from "./cube";
+
+function getLabeledCube(): Cube {
+  const cube = new Cube();
+  let id = 0;
+
+  for (const face of ["U", "R", "F", "D", "L", "B"] as const) {
+    // We use the color field as a hack to add a unique ID to each sticker.
+    // This makes it possible to catch some bugs where colors might be the same
+    // but the stickers could be different.
+    cube.state[face] = Array.from({ length: 9 }, () => id++ as Color);
+  }
+
+  return cube;
+}
 
 describe("parseMove", () => {
   it("parses simple moves", () => {
@@ -35,6 +57,83 @@ describe("parseMove", () => {
   });
 });
 
+describe("parseAlgorithm", () => {
+  it("parses a sequence of moves", () => {
+    expect(parseAlgorithm("R U F'")).toEqual([
+      { target: "R", turn: "cw" },
+      { target: "U", turn: "cw" },
+      { target: "F", turn: "ccw" },
+    ]);
+  });
+
+  it("returns empty array for empty/whitespace input", () => {
+    expect(parseAlgorithm("")).toEqual([]);
+    expect(parseAlgorithm("   ")).toEqual([]);
+  });
+
+  it("splits moves across mixed whitespace", () => {
+    expect(parseAlgorithm("  U\tR2\nF'  ")).toEqual([
+      { target: "U", turn: "cw" },
+      { target: "R", turn: "double" },
+      { target: "F", turn: "ccw" },
+    ]);
+  });
+
+  it("throws on invalid moves", () => {
+    expect(() => parseAlgorithm("U R Q")).toThrow("Invalid letter");
+  });
+});
+
+describe("invertMove", () => {
+  it("inverts cw to ccw", () => {
+    expect(invertMove({ target: "R", turn: "cw" })).toEqual({
+      target: "R",
+      turn: "ccw",
+    });
+  });
+
+  it("inverts ccw to cw", () => {
+    expect(invertMove({ target: "U", turn: "ccw" })).toEqual({
+      target: "U",
+      turn: "cw",
+    });
+  });
+
+  it("keeps double as double", () => {
+    expect(invertMove({ target: "F", turn: "double" })).toEqual({
+      target: "F",
+      turn: "double",
+    });
+  });
+});
+
+describe("invertAlgorithm", () => {
+  it("reverses and inverts each move", () => {
+    const alg = parseAlgorithm("R U' F2");
+    expect(invertAlgorithm(alg)).toEqual([
+      { target: "F", turn: "double" },
+      { target: "U", turn: "cw" },
+      { target: "R", turn: "ccw" },
+    ]);
+  });
+
+  it("returns empty array for empty input", () => {
+    expect(invertAlgorithm([])).toEqual([]);
+  });
+
+  it("algorithm + inverse = solved", () => {
+    const cube = getLabeledCube();
+    const alg = parseAlgorithm("R U R' F2 D' L");
+    const inv = invertAlgorithm(alg);
+    const before = cube.getStateClone();
+
+    for (const move of alg) cube.applyMove(move);
+    expect(cube.isSolved()).toBe(false);
+    for (const move of inv) cube.applyMove(move);
+    expect(cube.state).toEqual(before);
+  });
+});
+
 describe("Cube", () => {
   it("starts with default solved state", () => {
     const cube = new Cube();
@@ -44,25 +143,6 @@ describe("Cube", () => {
     expect(cube.state.D.every((c) => c === Color.Yellow)).toBe(true);
     expect(cube.state.L.every((c) => c === Color.Orange)).toBe(true);
     expect(cube.state.B.every((c) => c === Color.Blue)).toBe(true);
-  });
-
-  it("applyAlgorithm throws on invalid moves", () => {
-    const cube = new Cube();
-    expect(() => cube.applyAlgorithm("U R Q")).toThrow("Invalid letter");
-  });
-
-  it("applyAlgorithm treats empty input as a no-op", () => {
-    const cube = new Cube();
-    const initialState = structuredClone(cube.state);
-
-    expect(() => cube.applyAlgorithm("")).not.toThrow();
-    expect(() => cube.applyAlgorithm("   ")).not.toThrow();
-    expect(cube.state).toEqual(initialState);
-  });
-
-  it("applyAlgorithm splits moves across mixed whitespace", () => {
-    const cube = new Cube();
-    expect(() => cube.applyAlgorithm("  U\tR2\nF'  ")).not.toThrow();
   });
 });
 

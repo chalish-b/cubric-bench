@@ -95,6 +95,35 @@ export function parseMove(move: string): Move {
   } satisfies Move;
 }
 
+export function invertMove(move: Move): Move {
+  const newTurn = oppositeTurn(move.turn);
+  return {
+    target: move.target,
+    turn: newTurn,
+  } satisfies Move;
+}
+
+export function parseAlgorithm(algorithm: string): Move[] {
+  const trimmed = algorithm.trim();
+
+  // Empty algorithm should not be an error, it's just a no-op
+  if (!trimmed) {
+    return [];
+  }
+
+  const moves = trimmed.split(/\s+/);
+  const validMoves = moves.map((move) => parseMove(move));
+
+  return validMoves;
+}
+
+export function invertAlgorithm(algorithm: Move[]): Move[] {
+  const inverted = algorithm.map((move) => invertMove(move));
+  const reversed = inverted.slice().reverse();
+
+  return reversed;
+}
+
 export class Cube {
   state: CubeState = getDefaultState();
 
@@ -208,7 +237,7 @@ export class Cube {
         case "L": {
           const fTemp = f.slice();
           [f[0], f[3], f[6]] = [u[0], u[3], u[6]];
-          [u[0], u[3], u[6]] = [b[2], b[5], b[8]];
+          [u[0], u[3], u[6]] = [b[8], b[5], b[2]];
           [b[2], b[5], b[8]] = [d[6], d[3], d[0]];
           [d[0], d[3], d[6]] = [fTemp[0], fTemp[3], fTemp[6]];
           break;
@@ -269,17 +298,9 @@ export class Cube {
   }
 
   applyAlgorithm(algorithm: string) {
-    const trimmed = algorithm.trim();
-
-    // Empty algorithm should not be an error, it's just a no-op
-    if (!trimmed) {
-      return;
-    }
-
-    const moves = trimmed.split(/\s+/);
+    const moves = parseAlgorithm(algorithm);
     for (const move of moves) {
-      const validMove = parseMove(move);
-      this.applyMove(validMove);
+      this.applyMove(move);
     }
   }
 
@@ -313,3 +334,5 @@ export class Cube {
   // scramble()
   // ...
 }
+
+// Helpers

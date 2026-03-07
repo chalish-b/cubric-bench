@@ -4,4 +4,5 @@ Currently, I'm focusing on implementing the `cube` package, which will model the
 
 ## Things to keep in mind
 - Use `pnpm` for all npm related commands
+- Test the cube package using `pnpm --filter @cubric/cube test`
 
