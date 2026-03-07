@@ -14,7 +14,7 @@ const COLOR_MAP: Record<Color, string> = {
   [Color.White]: "#ffffff",
   [Color.Yellow]: "#ffd500",
   [Color.Green]: "#009b48",
-  [Color.Blue]: "#0045ad",
+  [Color.Blue]: "#0055bd",
   [Color.Red]: "#b90000",
   [Color.Orange]: "#f28900",
 };
@@ -112,80 +112,87 @@ export default function App() {
   }
 
   return (
-    <div style={{ width: "100vw", height: "100vh", position: "relative" }}>
-      <Canvas camera={{ position: [4, 3, 4] }}>
-        <ambientLight intensity={0.6} />
+    <div className="relative w-screen h-screen">
+      <Canvas camera={{ position: [6, 4, 6], fov: 40 }}>
+        <ambientLight intensity={0.8} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} />
         <OrbitControls />
         <VisualCube state={cubeState} />
       </Canvas>
 
-      <Controls onMove={doMove} onApplyAlgo={applyAlgo} onReset={reset} />
+      <MoveButtons onMove={doMove} onReset={reset} />
+      <AlgoBar onApplyAlgo={applyAlgo} />
     </div>
   );
 }
 
-function Controls({
+function MoveButtons({
   onMove,
-  onApplyAlgo,
   onReset,
 }: {
   onMove: (move: MoveString) => void;
-  onApplyAlgo: (algo: string) => void;
   onReset: () => void;
 }) {
+  const moveBtn =
+    "w-16 h-10 font-mono text-sm font-semibold rounded cursor-pointer transition-colors text-zinc-200 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 active:bg-zinc-600";
+
+  return (
+    <div className="absolute top-4 right-4 flex flex-col gap-1">
+      {MOVES.map((m) => (
+        <div key={m} className="flex gap-1">
+          <button className={moveBtn} onClick={() => onMove(m as MoveString)}>
+            {m}
+          </button>
+          <button
+            className={moveBtn}
+            onClick={() => onMove(`${m}'` as MoveString)}
+          >
+            {m}&apos;
+          </button>
+          <button
+            className={moveBtn}
+            onClick={() => onMove(`${m}2` as MoveString)}
+          >
+            {m}2
+          </button>
+        </div>
+      ))}
+      <button
+        className="mt-1 h-10 text-sm font-semibold rounded cursor-pointer transition-colors text-red-300 bg-zinc-800 border border-zinc-700 hover:bg-red-950 hover:border-red-800 active:bg-red-900"
+        onClick={onReset}
+      >
+        Reset
+      </button>
+    </div>
+  );
+}
+
+function AlgoBar({ onApplyAlgo }: { onApplyAlgo: (algo: string) => void }) {
   const [algo, setAlgo] = useState("");
 
   return (
-    <div
-      style={{
-        position: "absolute",
-        bottom: 20,
-        left: "50%",
-        transform: "translateX(-50%)",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        gap: 10,
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (algo.trim()) {
+          onApplyAlgo(algo);
+          setAlgo("");
+        }
       }}
+      className="absolute bottom-6 left-6 right-6 flex gap-2 items-stretch"
     >
-      <div
-        style={{
-          display: "flex",
-          gap: 4,
-          flexWrap: "wrap",
-          justifyContent: "center",
-        }}
+      <input
+        value={algo}
+        onChange={(e) => setAlgo(e.target.value)}
+        placeholder="Algorithm (e.g. R U R' U')"
+        className="flex-1 px-3 py-2 font-mono text-sm font-semibold rounded text-zinc-200 bg-zinc-800 border border-zinc-700 placeholder:text-zinc-500 focus:outline-none focus:border-zinc-500"
+      />
+      <button
+        type="submit"
+        className="px-6 py-2 text-sm font-semibold rounded cursor-pointer transition-colors text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700"
       >
-        {MOVES.map((m) => (
-          <div key={m} style={{ display: "flex", gap: 2 }}>
-            <button onClick={() => onMove(m as MoveString)}>{m}</button>
-            <button onClick={() => onMove(`${m}'` as MoveString)}>{m}'</button>
-            <button onClick={() => onMove(`${m}2` as MoveString)}>{m}2</button>
-          </div>
-        ))}
-        <button onClick={onReset} style={{ marginLeft: 8 }}>
-          Reset
-        </button>
-      </div>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (algo.trim()) {
-            onApplyAlgo(algo);
-            setAlgo("");
-          }
-        }}
-        style={{ display: "flex", gap: 4 }}
-      >
-        <input
-          value={algo}
-          onChange={(e) => setAlgo(e.target.value)}
-          placeholder="Algorithm (e.g. R U R' U')"
-          style={{ width: 240, padding: "4px 8px" }}
-        />
-        <button type="submit">Apply</button>
-      </form>
-    </div>
+        Apply
+      </button>
+    </form>
   );
 }
