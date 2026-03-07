@@ -103,6 +103,11 @@ export function invertMove(move: Move): Move {
   } satisfies Move;
 }
 
+export function stringifyMove(move: Move): MoveString {
+  const modifier = move.turn === "cw" ? "" : move.turn === "ccw" ? "'" : "2";
+  return `${move.target}${modifier}`;
+}
+
 export function parseAlgorithm(algorithm: string): Move[] {
   const trimmed = algorithm.trim();
 
@@ -122,6 +127,10 @@ export function invertAlgorithm(algorithm: Move[]): Move[] {
   const reversed = inverted.slice().reverse();
 
   return reversed;
+}
+
+export function stringifyAlgorithm(algorithm: Move[]): string {
+  return algorithm.map((move) => stringifyMove(move)).join(" ");
 }
 
 export class Cube {

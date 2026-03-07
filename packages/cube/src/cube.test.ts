@@ -4,6 +4,8 @@ import {
   parseAlgorithm,
   invertMove,
   invertAlgorithm,
+  stringifyMove,
+  stringifyAlgorithm,
   Cube,
   Color,
   getDefaultState,
@@ -131,6 +133,61 @@ describe("invertAlgorithm", () => {
     expect(cube.isSolved()).toBe(false);
     for (const move of inv) cube.applyMove(move);
     expect(cube.state).toEqual(before);
+  });
+});
+
+describe("stringifyMove", () => {
+  it("stringifies clockwise moves", () => {
+    expect(stringifyMove({ target: "R", turn: "cw" })).toBe("R");
+    expect(stringifyMove({ target: "U", turn: "cw" })).toBe("U");
+    expect(stringifyMove({ target: "x", turn: "cw" })).toBe("x");
+    expect(stringifyMove({ target: "M", turn: "cw" })).toBe("M");
+  });
+
+  it("stringifies counter-clockwise moves", () => {
+    expect(stringifyMove({ target: "R", turn: "ccw" })).toBe("R'");
+    expect(stringifyMove({ target: "F", turn: "ccw" })).toBe("F'");
+    expect(stringifyMove({ target: "z", turn: "ccw" })).toBe("z'");
+  });
+
+  it("stringifies double moves", () => {
+    expect(stringifyMove({ target: "R", turn: "double" })).toBe("R2");
+    expect(stringifyMove({ target: "U", turn: "double" })).toBe("U2");
+    expect(stringifyMove({ target: "S", turn: "double" })).toBe("S2");
+  });
+
+  it("roundtrips with parseMove", () => {
+    for (const move of ["R", "U'", "F2", "M", "x'", "E2"]) {
+      expect(stringifyMove(parseMove(move))).toBe(move);
+    }
+  });
+});
+
+describe("stringifyAlgorithm", () => {
+  it("stringifies a sequence of moves", () => {
+    expect(
+      stringifyAlgorithm([
+        { target: "R", turn: "cw" },
+        { target: "U", turn: "ccw" },
+        { target: "F", turn: "double" },
+      ]),
+    ).toBe("R U' F2");
+  });
+
+  it("returns empty string for empty array", () => {
+    expect(stringifyAlgorithm([])).toBe("");
+  });
+
+  it("roundtrips with parseAlgorithm", () => {
+    const input = "R U R' U' R' F R2 U' R' U' R U R' F'";
+    expect(stringifyAlgorithm(parseAlgorithm(input))).toBe(input);
+
+    const moves = [
+      { target: "L" as const, turn: "ccw" as const },
+      { target: "D" as const, turn: "double" as const },
+      { target: "x" as const, turn: "cw" as const },
+    ];
+    expect(parseAlgorithm(stringifyAlgorithm(moves))).toEqual(moves);
   });
 });
 
