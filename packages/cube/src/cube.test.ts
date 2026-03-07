@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { parseMove, Cube, Color } from "./cube";
 
 describe("parseMove", () => {
@@ -6,15 +6,18 @@ describe("parseMove", () => {
     expect(parseMove("U")).toBe("U");
     expect(parseMove("R")).toBe("R");
     expect(parseMove("x")).toBe("x");
+    expect(parseMove("M")).toBe("M");
   });
 
   it("parses moves with modifiers", () => {
     expect(parseMove("U'")).toBe("U'");
     expect(parseMove("R2")).toBe("R2");
     expect(parseMove("z'")).toBe("z'");
+    expect(parseMove("S2")).toBe("S2");
   });
 
   it("throws on invalid letter", () => {
+    expect(() => parseMove("")).toThrow("Invalid letter");
     expect(() => parseMove("Q")).toThrow("Invalid letter");
     expect(() => parseMove("2")).toThrow("Invalid letter");
   });
@@ -24,6 +27,7 @@ describe("parseMove", () => {
     // understand the intention, but they aren't standard, so it's invalid.
     expect(() => parseMove("U3")).toThrow("Invalid modifier");
     expect(() => parseMove("UU")).toThrow("Invalid modifier");
+    expect(() => parseMove("UR")).toThrow("Invalid modifier");
     expect(() => parseMove("U!")).toThrow("Invalid modifier");
   });
 
@@ -58,5 +62,17 @@ describe("Cube", () => {
     expect(() => cube.applyAlgorithm("")).not.toThrow();
     expect(() => cube.applyAlgorithm("   ")).not.toThrow();
     expect(cube.state).toEqual(initialState);
+  });
+
+  it("applyAlgorithm splits moves across mixed whitespace", () => {
+    const cube = new Cube();
+    const applyMove = vi.fn();
+    cube.applyMove = applyMove;
+
+    expect(() => cube.applyAlgorithm("  U\tR2\nF'  ")).not.toThrow();
+    expect(applyMove).toHaveBeenCalledTimes(3);
+    expect(applyMove).toHaveBeenNthCalledWith(1, "U");
+    expect(applyMove).toHaveBeenNthCalledWith(2, "R2");
+    expect(applyMove).toHaveBeenNthCalledWith(3, "F'");
   });
 });

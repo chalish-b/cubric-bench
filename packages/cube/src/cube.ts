@@ -9,8 +9,6 @@ export enum Color {
   Orange,
 }
 
-export const sides = ["U", "R", "F", "D", "L", "B"] as const;
-export type Side = (typeof sides)[number];
 export type CubeState = {
   U: Color[];
   R: Color[];
@@ -19,6 +17,40 @@ export type CubeState = {
   L: Color[];
   B: Color[];
 };
+
+export type Face = "U" | "R" | "F" | "D" | "L" | "B";
+export type Slice = "M" | "E" | "S";
+export type Rotation = "x" | "y" | "z";
+export type MoveTarget = Face | Slice | Rotation;
+
+export type TurnDirection = "cw" | "ccw" | "double";
+export function oppositeTurn(turn: TurnDirection): TurnDirection {
+  if (turn === "cw") return "ccw";
+  if (turn === "ccw") return "cw";
+  return "double";
+}
+
+export type Move = {
+  target: MoveTarget;
+  turn: TurnDirection;
+};
+
+const validMoveLetters = [
+  "U",
+  "R",
+  "F",
+  "D",
+  "L",
+  "B",
+  "M",
+  "E",
+  "S",
+  "x",
+  "y",
+  "z",
+] as const;
+export type MoveString =
+  `${(typeof validMoveLetters)[number]}${"" | "2" | "'"}`;
 
 // The standard is to have U=White and F=Green
 // Use moves like "x" "y" and "z" to change the orientation
@@ -33,9 +65,6 @@ function getDefaultState(): CubeState {
     B: Array(9).fill(Color.Blue),
   };
 }
-
-const validMoveLetters = ["U", "R", "F", "D", "L", "B", "x", "y", "z"] as const;
-export type Move = `${(typeof validMoveLetters)[number]}${"" | "2" | "'"}`;
 
 export function parseMove(move: string): Move {
   const letter = move[0];
@@ -56,14 +85,207 @@ export function parseMove(move: string): Move {
     throw new Error(`Invalid modifier "${modifier}" in move ${move}`);
   }
 
-  return move as Move;
+  const target = letter as MoveTarget;
+  const turn: TurnDirection =
+    modifier === undefined ? "cw" : modifier === "'" ? "ccw" : "double";
+
+  return {
+    target,
+    turn,
+  } satisfies Move;
 }
 
 export class Cube {
   state: CubeState = getDefaultState();
 
-  applyMove(move: Move) {
-    // This function only handles the actual move logic, modifying the state and stuff
+  applyMove(move: Move | MoveString) {
+    let m = typeof move === "string" ? parseMove(move) : move;
+
+    // x y and z moves. We swap the 4 sides, and rotate stickers on 2 faces
+    // TODO: Should we just simplifiy this to call _rotateSideStickers 3 times instead?
+    if (m.target === "x") {
+      // x is like an R move
+      // Right rotates normally, left is opposite
+      this._rotateFaceOnly("R", m.turn);
+      this._rotateFaceOnly("L", oppositeTurn(m.turn));
+
+      // Cycle the sides
+      const dTemp = this.state.D.slice();
+      this.state.D = this.state.B;
+      this.state.B = this.state.U;
+      this.state.U = this.state.F;
+      this.state.F = dTemp;
+
+      return;
+    }
+
+    if (m.target === "y") {
+      // y is like a U move
+      // Up rotates normally, down is opposite
+      this._rotateFaceOnly("U", m.turn);
+      this._rotateFaceOnly("D", oppositeTurn(m.turn));
+
+      // Cycle the sides
+      const rTemp = this.state.R.slice();
+      this.state.R = this.state.B;
+      this.state.B = this.state.L;
+      this.state.L = this.state.F;
+      this.state.F = rTemp;
+
+      return;
+    }
+
+    if (m.target === "z") {
+      // z is like an F move
+      // Front rotates normally, back is opposite
+      this._rotateFaceOnly("F", m.turn);
+      this._rotateFaceOnly("B", oppositeTurn(m.turn));
+
+      // Cycle the sides
+      const uTemp = this.state.U.slice();
+      this.state.U = this.state.L;
+      this.state.L = this.state.D;
+      this.state.D = this.state.R;
+      this.state.R = uTemp;
+
+      return;
+    }
+
+    // U R F D L B moves. We rotate the stickers on the face, and rotate side stickers
+    if (["U", "R", "F", "D", "L", "B"].includes(m.target)) {
+      this._rotateFaceOnly(m.target as Face, m.turn);
+      this._rotateSideStickers(m.target as Face, m.turn);
+    }
+
+    // M S E moves. We just rotate side stickers
+    if (["M", "S", "E"].includes(m.target)) {
+      this._rotateSideStickers(m.target as Slice, m.turn);
+    }
+  }
+
+  // NOTE: This rotates the stickers on one face only, not the side stickers on the same layer
+  // This is useful to be a separate function because moves like x, y, z can be done easier by
+  // rearranging the side faces and rotating the 2 other.
+  _rotateFaceOnly(face: Face, turn: TurnDirection) {
+    const f = this.state[face];
+    if (turn === "cw") {
+      [f[0], f[2], f[8], f[6]] = [f[6], f[0], f[2], f[8]];
+      [f[1], f[5], f[7], f[3]] = [f[3], f[1], f[5], f[7]];
+    } else if (turn === "ccw") {
+      [f[0], f[2], f[8], f[6]] = [f[2], f[8], f[6], f[0]];
+      [f[1], f[5], f[7], f[3]] = [f[5], f[7], f[3], f[1]];
+    } else if (turn === "double") {
+      [f[0], f[2], f[8], f[6]] = [f[8], f[6], f[0], f[2]];
+      [f[1], f[5], f[7], f[3]] = [f[7], f[3], f[1], f[5]];
+    }
+  }
+
+  // This isn't very useful by itself. Usually a rotation will call
+  // _rotateFaceOnly + _rotateSideStickers together.
+  _rotateSideStickers(layer: Face | Slice, turn: TurnDirection) {
+    // TODO: Make sure to test this properly. There is probably an error or something here
+    const rotateCw = () => {
+      const u = this.state.U;
+      const r = this.state.R;
+      const f = this.state.F;
+      const d = this.state.D;
+      const l = this.state.L;
+      const b = this.state.B;
+
+      switch (layer) {
+        case "U": {
+          const lTemp = l.slice();
+          [l[0], l[1], l[2]] = [f[0], f[1], f[2]];
+          [f[0], f[1], f[2]] = [r[0], r[1], r[2]];
+          [r[0], r[1], r[2]] = [b[0], b[1], b[2]];
+          [b[0], b[1], b[2]] = [lTemp[0], lTemp[1], lTemp[2]];
+          break;
+        }
+        case "R": {
+          const uTemp = u.slice();
+          [u[2], u[5], u[8]] = [f[2], f[5], f[8]];
+          [f[2], f[5], f[8]] = [d[2], d[5], d[8]];
+          [d[2], d[5], d[8]] = [b[6], b[3], b[0]];
+          [b[6], b[3], b[0]] = [uTemp[2], uTemp[5], uTemp[8]];
+          break;
+        }
+        case "F": {
+          const uTemp = u.slice();
+          [u[6], u[7], u[8]] = [l[8], l[5], l[2]];
+          [l[8], l[5], l[2]] = [d[2], d[1], d[0]];
+          [d[2], d[1], d[0]] = [r[0], r[3], r[6]];
+          [r[0], r[3], r[6]] = [uTemp[6], uTemp[7], uTemp[8]];
+          break;
+        }
+        case "D": {
+          const fTemp = f.slice();
+          [f[6], f[7], f[8]] = [l[6], l[7], l[8]];
+          [l[6], l[7], l[8]] = [b[6], b[7], b[8]];
+          [b[6], b[7], b[8]] = [r[6], r[7], r[8]];
+          [r[6], r[7], r[8]] = [fTemp[6], fTemp[7], fTemp[8]];
+          break;
+        }
+        case "L": {
+          const fTemp = f.slice();
+          [f[0], f[3], f[6]] = [u[0], u[3], u[6]];
+          [u[0], u[3], u[6]] = [b[2], b[5], b[8]];
+          [b[2], b[5], b[8]] = [d[6], d[3], d[0]];
+          [d[0], d[3], d[6]] = [fTemp[0], fTemp[3], fTemp[6]];
+          break;
+        }
+        case "B": {
+          const uTemp = u.slice();
+          [u[0], u[1], u[2]] = [r[2], r[5], r[8]];
+          [r[2], r[5], r[8]] = [d[8], d[7], d[6]];
+          [d[6], d[7], d[8]] = [l[0], l[3], l[6]];
+          [l[0], l[3], l[6]] = [uTemp[2], uTemp[1], uTemp[0]];
+          break;
+        }
+        case "M": {
+          // M is basically like L
+          const uTemp = u.slice();
+          [u[1], u[4], u[7]] = [b[7], b[4], b[1]];
+          [b[7], b[4], b[1]] = [d[1], d[4], d[7]];
+          [d[1], d[4], d[7]] = [f[1], f[4], f[7]];
+          [f[1], f[4], f[7]] = [uTemp[1], uTemp[4], uTemp[7]];
+          break;
+        }
+        case "E": {
+          // E is like D
+          const fTemp = f.slice();
+          [f[3], f[4], f[5]] = [l[3], l[4], l[5]];
+          [l[3], l[4], l[5]] = [b[3], b[4], b[5]];
+          [b[3], b[4], b[5]] = [r[3], r[4], r[5]];
+          [r[3], r[4], r[5]] = [fTemp[3], fTemp[4], fTemp[5]];
+          break;
+        }
+        case "S": {
+          // S is like F
+          const uTemp = u.slice();
+          [u[3], u[4], u[5]] = [l[7], l[4], l[1]];
+          [l[7], l[4], l[1]] = [d[5], d[4], d[3]];
+          [d[5], d[4], d[3]] = [r[1], r[4], r[7]];
+          [r[1], r[4], r[7]] = [uTemp[3], uTemp[4], uTemp[5]];
+          break;
+        }
+      }
+    };
+
+    // This is so fucking stupid lol
+    // We don't really care about animation or anything right now, so it should
+    // work for generating the images of final states
+    // Even in visualization, if we wait for the function to finish fully before updating
+    // the final state, it can still work without seeing those intermediate states
+    if (turn === "cw") {
+      rotateCw();
+    } else if (turn === "double") {
+      rotateCw();
+      rotateCw();
+    } else if (turn === "ccw") {
+      rotateCw();
+      rotateCw();
+      rotateCw();
+    }
   }
 
   applyAlgorithm(algorithm: string) {
@@ -79,6 +301,21 @@ export class Cube {
       const validMove = parseMove(move);
       this.applyMove(validMove);
     }
+  }
+
+  getStateClone(): CubeState {
+    return {
+      U: [...this.state.U],
+      R: [...this.state.R],
+      F: [...this.state.F],
+      D: [...this.state.D],
+      L: [...this.state.L],
+      B: [...this.state.B],
+    };
+  }
+
+  resetState() {
+    this.state = getDefaultState();
   }
 
   // More methods

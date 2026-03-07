@@ -1,2 +1,2 @@
-export { Color, sides, Cube, parseMove } from "./cube";
-export type { Side, CubeState, Move } from "./cube";
+export { Color, Cube, parseMove } from "./cube";
+export type { Face, CubeState, MoveString } from "./cube";
