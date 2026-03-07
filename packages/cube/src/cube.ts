@@ -55,7 +55,7 @@ export type MoveString =
 // The standard is to have U=White and F=Green
 // Use moves like "x" "y" and "z" to change the orientation
 // The image given to the AI will always show the "F R U" faces
-function getDefaultState(): CubeState {
+export function getDefaultState(): CubeState {
   return {
     U: Array(9).fill(Color.White),
     R: Array(9).fill(Color.Red),
@@ -101,52 +101,32 @@ export class Cube {
   applyMove(move: Move | MoveString) {
     let m = typeof move === "string" ? parseMove(move) : move;
 
-    // x y and z moves. We swap the 4 sides, and rotate stickers on 2 faces
+    // x y and z moves.
+    // These can be broken down into 3 normal moves
     // TODO: Should we just simplifiy this to call _rotateSideStickers 3 times instead?
     if (m.target === "x") {
-      // x is like an R move
-      // Right rotates normally, left is opposite
-      this._rotateFaceOnly("R", m.turn);
-      this._rotateFaceOnly("L", oppositeTurn(m.turn));
-
-      // Cycle the sides
-      const dTemp = this.state.D.slice();
-      this.state.D = this.state.B;
-      this.state.B = this.state.U;
-      this.state.U = this.state.F;
-      this.state.F = dTemp;
+      // x = R + M' + L'
+      this.applyMove({ target: "R", turn: m.turn });
+      this.applyMove({ target: "M", turn: oppositeTurn(m.turn) });
+      this.applyMove({ target: "L", turn: oppositeTurn(m.turn) });
 
       return;
     }
 
     if (m.target === "y") {
-      // y is like a U move
-      // Up rotates normally, down is opposite
-      this._rotateFaceOnly("U", m.turn);
-      this._rotateFaceOnly("D", oppositeTurn(m.turn));
-
-      // Cycle the sides
-      const rTemp = this.state.R.slice();
-      this.state.R = this.state.B;
-      this.state.B = this.state.L;
-      this.state.L = this.state.F;
-      this.state.F = rTemp;
+      // y = U + E' + D'
+      this.applyMove({ target: "U", turn: m.turn });
+      this.applyMove({ target: "E", turn: oppositeTurn(m.turn) });
+      this.applyMove({ target: "D", turn: oppositeTurn(m.turn) });
 
       return;
     }
 
     if (m.target === "z") {
-      // z is like an F move
-      // Front rotates normally, back is opposite
-      this._rotateFaceOnly("F", m.turn);
-      this._rotateFaceOnly("B", oppositeTurn(m.turn));
-
-      // Cycle the sides
-      const uTemp = this.state.U.slice();
-      this.state.U = this.state.L;
-      this.state.L = this.state.D;
-      this.state.D = this.state.R;
-      this.state.R = uTemp;
+      // z = F + S + B'
+      this.applyMove({ target: "F", turn: m.turn });
+      this.applyMove({ target: "S", turn: m.turn });
+      this.applyMove({ target: "B", turn: oppositeTurn(m.turn) });
 
       return;
     }
@@ -318,8 +298,17 @@ export class Cube {
     this.state = getDefaultState();
   }
 
+  isSolved(): boolean {
+    const d = getDefaultState();
+    for (const face of ["U", "R", "F", "D", "L", "B"] as const) {
+      for (let i = 0; i < 9; i++) {
+        if (this.state[face][i] !== d[face][i]) return false;
+      }
+    }
+    return true;
+  }
+
   // More methods
-  // isSolved()
   // isValid()
   // scramble()
   // ...
