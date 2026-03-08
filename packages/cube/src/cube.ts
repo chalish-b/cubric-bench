@@ -355,11 +355,9 @@ export class Cube {
       }
     };
 
-    // This is so fucking stupid lol
-    // We don't really care about animation or anything right now, so it should
-    // work for generating the images of final states
-    // Even in visualization, if we wait for the function to finish fully before updating
-    // the final state, it can still work without seeing those intermediate states
+    // This is so fucking stupid lol, but it doesn't matter.
+    // Even in visualization, if we only update the visual after calling this function
+    // (not in real time), it would still work.
     if (turn === "cw") {
       rotateCw();
     } else if (turn === "double") {
