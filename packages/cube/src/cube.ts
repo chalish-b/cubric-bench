@@ -19,9 +19,10 @@ export type CubeState = {
 };
 
 export type Face = "U" | "R" | "F" | "D" | "L" | "B";
+export type Wide = "u" | "r" | "f" | "d" | "l" | "b";
 export type Slice = "M" | "E" | "S";
 export type Rotation = "x" | "y" | "z";
-export type MoveTarget = Face | Slice | Rotation;
+export type MoveTarget = Face | Wide | Slice | Rotation;
 
 export type TurnDirection = "cw" | "ccw" | "double";
 export function oppositeTurn(turn: TurnDirection): TurnDirection {
@@ -37,11 +38,17 @@ export type Move = {
 
 const validMoveLetters = [
   "U",
+  "u",
   "R",
+  "r",
   "F",
+  "f",
   "D",
+  "d",
   "L",
+  "l",
   "B",
+  "b",
   "M",
   "E",
   "S",
@@ -141,7 +148,6 @@ export class Cube {
 
     // x y and z moves.
     // These can be broken down into 3 normal moves
-    // TODO: Should we just simplifiy this to call _rotateSideStickers 3 times instead?
     if (m.target === "x") {
       // x = R + M' + L'
       this.applyMove({ target: "R", turn: m.turn });
@@ -165,6 +171,55 @@ export class Cube {
       this.applyMove({ target: "F", turn: m.turn });
       this.applyMove({ target: "S", turn: m.turn });
       this.applyMove({ target: "B", turn: oppositeTurn(m.turn) });
+
+      return;
+    }
+
+    // Wide moves. These can be broken down into a side + middle layer moves
+    if (m.target === "r") {
+      // r = R + M'
+      this.applyMove({ target: "R", turn: m.turn });
+      this.applyMove({ target: "M", turn: oppositeTurn(m.turn) });
+
+      return;
+    }
+
+    if (m.target === "l") {
+      // l = L + M
+      this.applyMove({ target: "L", turn: m.turn });
+      this.applyMove({ target: "M", turn: m.turn });
+
+      return;
+    }
+
+    if (m.target === "u") {
+      // u = U + E'
+      this.applyMove({ target: "U", turn: m.turn });
+      this.applyMove({ target: "E", turn: oppositeTurn(m.turn) });
+
+      return;
+    }
+
+    if (m.target === "d") {
+      // d = D + E
+      this.applyMove({ target: "D", turn: m.turn });
+      this.applyMove({ target: "E", turn: m.turn });
+
+      return;
+    }
+
+    if (m.target === "f") {
+      // f = F + S
+      this.applyMove({ target: "F", turn: m.turn });
+      this.applyMove({ target: "S", turn: m.turn });
+
+      return;
+    }
+
+    if (m.target === "b") {
+      // b = B + S'
+      this.applyMove({ target: "B", turn: m.turn });
+      this.applyMove({ target: "S", turn: oppositeTurn(m.turn) });
 
       return;
     }

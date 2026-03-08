@@ -31,6 +31,7 @@ describe("parseMove", () => {
     expect(parseMove("R")).toEqual({ target: "R", turn: "cw" });
     expect(parseMove("x")).toEqual({ target: "x", turn: "cw" });
     expect(parseMove("M")).toEqual({ target: "M", turn: "cw" });
+    expect(parseMove("r")).toEqual({ target: "r", turn: "cw" });
   });
 
   it("parses moves with modifiers", () => {
@@ -207,8 +208,9 @@ describe("move identity: x4 = solved", () => {
   const faces = ["U", "R", "F", "D", "L", "B"] as const;
   const slices = ["M", "E", "S"] as const;
   const rotations = ["x", "y", "z"] as const;
+  const wideMoves = ["r", "l", "u", "d", "f", "b"] as const;
 
-  for (const move of [...faces, ...slices, ...rotations]) {
+  for (const move of [...faces, ...slices, ...rotations, ...wideMoves]) {
     it(`${move} x4 returns to solved`, () => {
       const cube = new Cube();
       for (let i = 0; i < 4; i++) cube.applyMove(move);
@@ -244,6 +246,12 @@ describe("move + inverse = identity", () => {
     "x",
     "y",
     "z",
+    "r",
+    "l",
+    "u",
+    "d",
+    "f",
+    "b",
   ] as const;
 
   for (const move of allMoves) {
@@ -270,6 +278,12 @@ describe("double = 2x CW", () => {
     "x",
     "y",
     "z",
+    "r",
+    "l",
+    "u",
+    "d",
+    "f",
+    "b",
   ] as const;
 
   for (const move of allMoves) {
@@ -352,6 +366,51 @@ describe("rotation composition", () => {
 
     expect(cube1.state).toEqual(cube2.state);
   });
+});
+
+describe("wide moves (lowercase)", () => {
+  const wideMoveDecompositions = [
+    ["r", "R M'"],
+    ["l", "L M"],
+    ["u", "U E'"],
+    ["d", "D E"],
+    ["f", "F S"],
+    ["b", "B S'"],
+  ] as const;
+
+  for (const [wide, decomposition] of wideMoveDecompositions) {
+    it(`${wide} equals ${decomposition}`, () => {
+      const cube1 = getLabeledCube();
+      cube1.applyMove(wide);
+
+      const cube2 = getLabeledCube();
+      cube2.applyAlgorithm(decomposition);
+
+      expect(cube1.state).toEqual(cube2.state);
+    });
+
+    it(`${wide}' equals inverse of ${decomposition}`, () => {
+      const cube1 = getLabeledCube();
+      cube1.applyMove(`${wide}'`);
+
+      const cube2 = getLabeledCube();
+      const inverse = invertAlgorithm(parseAlgorithm(decomposition));
+      cube2.applyAlgorithm(stringifyAlgorithm(inverse));
+
+      expect(cube1.state).toEqual(cube2.state);
+    });
+
+    it(`${wide}2 equals double of ${decomposition}`, () => {
+      const cube1 = getLabeledCube();
+      cube1.applyMove(`${wide}2`);
+
+      const cube2 = getLabeledCube();
+      cube2.applyAlgorithm(decomposition);
+      cube2.applyAlgorithm(decomposition);
+
+      expect(cube1.state).toEqual(cube2.state);
+    });
+  }
 });
 
 describe("specific move results", () => {

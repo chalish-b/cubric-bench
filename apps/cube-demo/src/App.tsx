@@ -136,6 +136,12 @@ const MOVES = [
   "B",
   "R",
   "L",
+  "u",
+  "d",
+  "f",
+  "b",
+  "r",
+  "l",
   "M",
   "E",
   "S",
@@ -173,7 +179,7 @@ export default function App() {
 
   return (
     <div className="relative w-screen h-screen">
-      <Canvas camera={{ position: [8, 4, 8], fov: 45 }}>
+      <Canvas camera={{ position: [8, 6, 8], fov: 45 }}>
         <ambientLight intensity={0.8} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} />
         <OrbitControls target={[0, -1, 0]} />
