@@ -1,5 +1,5 @@
 import { Canvas } from "@react-three/fiber";
-import { OrbitControls } from "@react-three/drei";
+import { OrbitControls, Text } from "@react-three/drei";
 import {
   Cube,
   Color,
@@ -58,9 +58,11 @@ const FACE_CONFIG: Record<
 function FaceStickers({
   colors,
   transparent,
+  backSide,
 }: {
   colors: Color[];
   transparent?: boolean;
+  backSide?: boolean;
 }) {
   return (
     <>
@@ -75,6 +77,7 @@ function FaceStickers({
               transparent={transparent}
               opacity={transparent ? 0.8 : 1}
               depthWrite={!transparent}
+              side={backSide ? THREE.BackSide : THREE.FrontSide}
             />
           </mesh>
         );
@@ -83,9 +86,16 @@ function FaceStickers({
   );
 }
 
-const GHOST_DISTANCE = 1.8;
+const GHOST_DISTANCE = 2.0;
+const LABEL_DISTANCE = 1.5;
 
-function VisualCube({ state, showGhosts }: { state: CubeState; showGhosts: boolean }) {
+function VisualCube({
+  state,
+  showGhosts,
+}: {
+  state: CubeState;
+  showGhosts: boolean;
+}) {
   return (
     <group>
       <mesh>
@@ -107,11 +117,9 @@ function VisualCube({ state, showGhosts }: { state: CubeState; showGhosts: boole
             {showGhosts && (
               <group
                 position={ghostPos}
-                rotation={
-                  new THREE.Euler(rotation[0], rotation[1] + Math.PI, rotation[2])
-                }
+                rotation={new THREE.Euler(...rotation)}
               >
-                <FaceStickers colors={state[face]} transparent />
+                <FaceStickers colors={state[face]} transparent backSide />
               </group>
             )}
           </group>
@@ -142,6 +150,7 @@ export default function App() {
     cubeRef.current.getStateClone(),
   );
   const [showGhosts, setShowGhosts] = useState(true);
+  const [showLabels, setShowLabels] = useState(true);
 
   function updateState() {
     setCubeState(cubeRef.current.getStateClone());
@@ -164,19 +173,53 @@ export default function App() {
 
   return (
     <div className="relative w-screen h-screen">
-      <Canvas camera={{ position: [6, 4, 6], fov: 40 }}>
+      <Canvas camera={{ position: [8, 4, 8], fov: 45 }}>
         <ambientLight intensity={0.8} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} />
-        <OrbitControls />
+        <OrbitControls target={[0, -1, 0]} />
         <VisualCube state={cubeState} showGhosts={showGhosts} />
+        {showLabels && (
+          <>
+            <Text
+              position={[0, -1.51 - GHOST_DISTANCE, 1.51 + LABEL_DISTANCE]}
+              rotation={[-Math.PI / 2, 0, 0]}
+              fontSize={1.2}
+              anchorX="center"
+              anchorY="middle"
+              fontWeight={600}
+            >
+              F
+              <meshBasicMaterial color="#000000" side={THREE.FrontSide} />
+            </Text>
+            <Text
+              position={[1.51 + LABEL_DISTANCE, -1.51 - GHOST_DISTANCE, 0]}
+              rotation={[-Math.PI / 2, 0, Math.PI / 2]}
+              fontSize={1.2}
+              anchorX="center"
+              anchorY="middle"
+              fontWeight={600}
+            >
+              R
+              <meshBasicMaterial color="#000000" side={THREE.FrontSide} />
+            </Text>
+          </>
+        )}
       </Canvas>
 
-      <button
-        className="absolute top-4 left-4 px-3 py-2 text-sm font-semibold rounded cursor-pointer transition-colors text-zinc-200 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 active:bg-zinc-600"
-        onClick={() => setShowGhosts((v) => !v)}
-      >
-        {showGhosts ? "Hide" : "Show"} ghost faces
-      </button>
+      <div className="absolute top-4 left-4 flex flex-col gap-2">
+        <button
+          className="px-3 py-2 text-sm font-semibold rounded cursor-pointer transition-colors text-zinc-200 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 active:bg-zinc-600"
+          onClick={() => setShowGhosts((v) => !v)}
+        >
+          {showGhosts ? "Hide" : "Show"} ghost faces
+        </button>
+        <button
+          className="px-3 py-2 text-sm font-semibold rounded cursor-pointer transition-colors text-zinc-200 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 active:bg-zinc-600"
+          onClick={() => setShowLabels((v) => !v)}
+        >
+          {showLabels ? "Hide" : "Show"} face labels
+        </button>
+      </div>
       <MoveButtons onMove={doMove} onReset={reset} />
       <AlgoBar onApplyAlgo={applyAlgo} />
     </div>
