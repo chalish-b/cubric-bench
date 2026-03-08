@@ -1,0 +1,17 @@
+{
+  "name": "@cubric/bench",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "generate:pll": "bun src/generate.ts"
+  },
+  "dependencies": {
+    "@cubric/cube": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.14",
+    "playwright": "^1.52.0",
+    "typescript": "~5.9.3"
+  }
+}

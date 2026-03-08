@@ -7,7 +7,7 @@ import {
   type Face,
   type MoveString,
 } from "@cubric/cube";
-import { useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import * as THREE from "three";
 
 const COLOR_MAP: Record<Color, string> = {
@@ -150,13 +150,46 @@ const MOVES = [
   "z",
 ] as const;
 
+declare global {
+  interface Window {
+    __CUBRIC_READY?: boolean;
+  }
+}
+
 export default function App() {
+  const params = useMemo(() => new URLSearchParams(window.location.search), []);
+  const noUI = params.get("noUI") === "1";
+  const initialGhosts = params.has("ghosts")
+    ? params.get("ghosts") === "on"
+    : true;
+  const initialLabels = params.has("labels")
+    ? params.get("labels") === "on"
+    : true;
+  const cameraPosition: [number, number, number] = [
+    parseFloat(params.get("cameraX") ?? "8"),
+    parseFloat(params.get("cameraY") ?? "6"),
+    parseFloat(params.get("cameraZ") ?? "8"),
+  ];
+
   const cubeRef = useRef(new Cube());
   const [cubeState, setCubeState] = useState<CubeState>(
     cubeRef.current.getStateClone(),
   );
-  const [showGhosts, setShowGhosts] = useState(true);
-  const [showLabels, setShowLabels] = useState(true);
+  const [showGhosts, setShowGhosts] = useState(initialGhosts);
+  const [showLabels, setShowLabels] = useState(initialLabels);
+
+  useEffect(() => {
+    const stateParam = params.get("state");
+    if (stateParam) {
+      try {
+        const parsed = JSON.parse(stateParam) as CubeState;
+        cubeRef.current.state = parsed;
+        setCubeState(cubeRef.current.getStateClone());
+      } catch {
+        // ignore invalid state params
+      }
+    }
+  }, [params]);
 
   function updateState() {
     setCubeState(cubeRef.current.getStateClone());
@@ -184,10 +217,15 @@ export default function App() {
 
   return (
     <div className="relative w-screen h-screen">
-      <Canvas camera={{ position: [8, 6, 8], fov: 45 }}>
+      <Canvas
+        camera={{ position: cameraPosition, fov: 45 }}
+        onCreated={() => {
+          window.__CUBRIC_READY = true;
+        }}
+      >
         <ambientLight intensity={1} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} />
-        <OrbitControls target={[0, -1, 0]} />
+        {!noUI && <OrbitControls target={[0, -1, 0]} />}
         <VisualCube state={cubeState} showGhosts={showGhosts} />
         {showLabels && (
           <>
@@ -217,22 +255,26 @@ export default function App() {
         )}
       </Canvas>
 
-      <div className="absolute top-4 left-4 flex flex-col gap-2">
-        <button
-          className="px-3 py-2 text-sm font-semibold rounded cursor-pointer transition-colors text-zinc-200 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 active:bg-zinc-600"
-          onClick={() => setShowGhosts((v) => !v)}
-        >
-          {showGhosts ? "Hide" : "Show"} ghost faces
-        </button>
-        <button
-          className="px-3 py-2 text-sm font-semibold rounded cursor-pointer transition-colors text-zinc-200 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 active:bg-zinc-600"
-          onClick={() => setShowLabels((v) => !v)}
-        >
-          {showLabels ? "Hide" : "Show"} face labels
-        </button>
-      </div>
-      <MoveButtons onMove={doMove} onScramble={scramble} onReset={reset} />
-      <AlgoBar onApplyAlgo={applyAlgo} />
+      {!noUI && (
+        <>
+          <div className="absolute top-4 left-4 flex flex-col gap-2">
+            <button
+              className="px-3 py-2 text-sm font-semibold rounded cursor-pointer transition-colors text-zinc-200 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 active:bg-zinc-600"
+              onClick={() => setShowGhosts((v) => !v)}
+            >
+              {showGhosts ? "Hide" : "Show"} ghost faces
+            </button>
+            <button
+              className="px-3 py-2 text-sm font-semibold rounded cursor-pointer transition-colors text-zinc-200 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 active:bg-zinc-600"
+              onClick={() => setShowLabels((v) => !v)}
+            >
+              {showLabels ? "Hide" : "Show"} face labels
+            </button>
+          </div>
+          <MoveButtons onMove={doMove} onScramble={scramble} onReset={reset} />
+          <AlgoBar onApplyAlgo={applyAlgo} />
+        </>
+      )}
     </div>
   );
 }
