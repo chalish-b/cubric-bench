@@ -21,17 +21,47 @@ const COLOR_MAP: Record<Color, string> = {
 
 const FACE_CONFIG: Record<
   Face,
-  { position: [number, number, number]; rotation: [number, number, number] }
+  {
+    position: [number, number, number];
+    rotation: [number, number, number];
+    ghostOffset: [number, number, number];
+  }
 > = {
-  U: { position: [0, 1.51, 0], rotation: [-Math.PI / 2, 0, 0] },
-  D: { position: [0, -1.51, 0], rotation: [Math.PI / 2, 0, 0] },
-  F: { position: [0, 0, 1.51], rotation: [0, 0, 0] },
-  B: { position: [0, 0, -1.51], rotation: [0, Math.PI, 0] },
-  R: { position: [1.51, 0, 0], rotation: [0, Math.PI / 2, 0] },
-  L: { position: [-1.51, 0, 0], rotation: [0, -Math.PI / 2, 0] },
+  U: {
+    position: [0, 1.51, 0],
+    rotation: [-Math.PI / 2, 0, 0],
+    ghostOffset: [0, 1, 0],
+  },
+  D: {
+    position: [0, -1.51, 0],
+    rotation: [Math.PI / 2, 0, 0],
+    ghostOffset: [0, -1, 0],
+  },
+  F: { position: [0, 0, 1.51], rotation: [0, 0, 0], ghostOffset: [0, 0, 1] },
+  B: {
+    position: [0, 0, -1.51],
+    rotation: [0, Math.PI, 0],
+    ghostOffset: [0, 0, -1],
+  },
+  R: {
+    position: [1.51, 0, 0],
+    rotation: [0, Math.PI / 2, 0],
+    ghostOffset: [1, 0, 0],
+  },
+  L: {
+    position: [-1.51, 0, 0],
+    rotation: [0, -Math.PI / 2, 0],
+    ghostOffset: [-1, 0, 0],
+  },
 };
 
-function FaceStickers({ colors }: { colors: Color[] }) {
+function FaceStickers({
+  colors,
+  transparent,
+}: {
+  colors: Color[];
+  transparent?: boolean;
+}) {
   return (
     <>
       {colors.map((color, i) => {
@@ -40,7 +70,12 @@ function FaceStickers({ colors }: { colors: Color[] }) {
         return (
           <mesh key={i} position={[col - 1, 1 - row, 0]}>
             <planeGeometry args={[0.85, 0.85]} />
-            <meshStandardMaterial color={COLOR_MAP[color]} />
+            <meshStandardMaterial
+              color={COLOR_MAP[color]}
+              transparent={transparent}
+              opacity={transparent ? 0.8 : 1}
+              depthWrite={!transparent}
+            />
           </mesh>
         );
       })}
@@ -48,7 +83,9 @@ function FaceStickers({ colors }: { colors: Color[] }) {
   );
 }
 
-function VisualCube({ state }: { state: CubeState }) {
+const GHOST_DISTANCE = 1.8;
+
+function VisualCube({ state, showGhosts }: { state: CubeState; showGhosts: boolean }) {
   return (
     <group>
       <mesh>
@@ -56,14 +93,27 @@ function VisualCube({ state }: { state: CubeState }) {
         <meshStandardMaterial color="#111111" />
       </mesh>
       {(Object.keys(FACE_CONFIG) as Face[]).map((face) => {
-        const { position, rotation } = FACE_CONFIG[face];
+        const { position, rotation, ghostOffset } = FACE_CONFIG[face];
+        const ghostPos: [number, number, number] = [
+          position[0] + ghostOffset[0] * GHOST_DISTANCE,
+          position[1] + ghostOffset[1] * GHOST_DISTANCE,
+          position[2] + ghostOffset[2] * GHOST_DISTANCE,
+        ];
         return (
-          <group
-            key={face}
-            position={position}
-            rotation={new THREE.Euler(...rotation)}
-          >
-            <FaceStickers colors={state[face]} />
+          <group key={face}>
+            <group position={position} rotation={new THREE.Euler(...rotation)}>
+              <FaceStickers colors={state[face]} />
+            </group>
+            {showGhosts && (
+              <group
+                position={ghostPos}
+                rotation={
+                  new THREE.Euler(rotation[0], rotation[1] + Math.PI, rotation[2])
+                }
+              >
+                <FaceStickers colors={state[face]} transparent />
+              </group>
+            )}
           </group>
         );
       })}
@@ -91,6 +141,7 @@ export default function App() {
   const [cubeState, setCubeState] = useState<CubeState>(
     cubeRef.current.getStateClone(),
   );
+  const [showGhosts, setShowGhosts] = useState(true);
 
   function updateState() {
     setCubeState(cubeRef.current.getStateClone());
@@ -117,9 +168,15 @@ export default function App() {
         <ambientLight intensity={0.8} />
         <directionalLight position={[5, 5, 5]} intensity={0.8} />
         <OrbitControls />
-        <VisualCube state={cubeState} />
+        <VisualCube state={cubeState} showGhosts={showGhosts} />
       </Canvas>
 
+      <button
+        className="absolute top-4 left-4 px-3 py-2 text-sm font-semibold rounded cursor-pointer transition-colors text-zinc-200 bg-zinc-800 border border-zinc-700 hover:bg-zinc-700 hover:border-zinc-600 active:bg-zinc-600"
+        onClick={() => setShowGhosts((v) => !v)}
+      >
+        {showGhosts ? "Hide" : "Show"} ghost faces
+      </button>
       <MoveButtons onMove={doMove} onReset={reset} />
       <AlgoBar onApplyAlgo={applyAlgo} />
     </div>
