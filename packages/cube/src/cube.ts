@@ -115,6 +115,19 @@ export function stringifyMove(move: Move): MoveString {
   return `${move.target}${modifier}`;
 }
 
+export function randomMove(): Move {
+  const validTurns = ["cw", "ccw", "double"] as const;
+  const randomMoveTarget =
+    validMoveLetters[Math.floor(Math.random() * validMoveLetters.length)];
+
+  const randomTurn = validTurns[Math.floor(Math.random() * validTurns.length)];
+
+  return {
+    target: randomMoveTarget,
+    turn: randomTurn,
+  } satisfies Move;
+}
+
 export function parseAlgorithm(algorithm: string): Move[] {
   const trimmed = algorithm.trim();
 
@@ -236,9 +249,9 @@ export class Cube {
     }
   }
 
-  // NOTE: This rotates the stickers on one face only, not the side stickers on the same layer
-  // This is useful to be a separate function because moves like x, y, z can be done easier by
-  // rearranging the side faces and rotating the 2 other.
+  // NOTE: This rotates the stickers on one face only, not the side stickers of the layer
+  // The main 6 moves will use _rotateFaceOnly + _rotateSideStickers together,
+  // But middle moves will only use _rotateSideStickers, so it's helpful to be separate.
   _rotateFaceOnly(face: Face, turn: TurnDirection) {
     const f = this.state[face];
     if (turn === "cw") {
@@ -253,8 +266,6 @@ export class Cube {
     }
   }
 
-  // This isn't very useful by itself. Usually a rotation will call
-  // _rotateFaceOnly + _rotateSideStickers together.
   _rotateSideStickers(layer: Face | Slice, turn: TurnDirection) {
     // TODO: Make sure to test this properly. There is probably an error or something here
     const rotateCw = () => {
@@ -393,10 +404,24 @@ export class Cube {
     return true;
   }
 
-  // More methods
-  // isValid()
-  // scramble()
-  // ...
+  // Returns the center piece color of a face
+  getFaceColor(face: Face): Color {
+    return this.state[face][4];
+  }
+
+  // NOTE: The naive approach is to just keep generating random moves in a sequence.
+  // But that's not the official approach and it's biased towards easier solves.
+  // It's not a huge issue right now though, the naive approach should work well enough.
+  scramble() {
+    for (let i = 0; i < 100; i++) {
+      const move = randomMove();
+      this.applyMove(move);
+    }
+  }
+
+  // This might be harder to do with face-array representation, not really needed right now
+  // We can give it a shot if we implement the cubie representation
+  // isValid() {}
 }
 
 // Helpers

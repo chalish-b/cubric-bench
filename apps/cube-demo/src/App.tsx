@@ -172,6 +172,11 @@ export default function App() {
     updateState();
   }
 
+  function scramble() {
+    cubeRef.current.scramble();
+    updateState();
+  }
+
   function reset() {
     cubeRef.current.resetState();
     updateState();
@@ -226,7 +231,7 @@ export default function App() {
           {showLabels ? "Hide" : "Show"} face labels
         </button>
       </div>
-      <MoveButtons onMove={doMove} onReset={reset} />
+      <MoveButtons onMove={doMove} onScramble={scramble} onReset={reset} />
       <AlgoBar onApplyAlgo={applyAlgo} />
     </div>
   );
@@ -234,9 +239,11 @@ export default function App() {
 
 function MoveButtons({
   onMove,
+  onScramble,
   onReset,
 }: {
   onMove: (move: MoveString) => void;
+  onScramble: () => void;
   onReset: () => void;
 }) {
   const moveBtn =
@@ -244,6 +251,12 @@ function MoveButtons({
 
   return (
     <div className="absolute top-4 right-4 flex flex-col gap-1">
+      <button
+        className="h-10 text-sm font-semibold rounded cursor-pointer transition-colors text-blue-300 bg-zinc-800 border border-zinc-700 hover:bg-blue-950 hover:border-blue-800 active:bg-blue-900"
+        onClick={onScramble}
+      >
+        Scramble
+      </button>
       {MOVES.map((m) => (
         <div key={m} className="flex gap-1">
           <button className={moveBtn} onClick={() => onMove(m as MoveString)}>
