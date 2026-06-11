@@ -1,0 +1,14 @@
+{
+  "runId": "2026-06-11-17-21-54_pll_identify_google-gemini-3-flash-preview_img-vtext",
+  "suiteId": "pll",
+  "suiteHash": "d0822c235ff7",
+  "taskId": "identify",
+  "image": true,
+  "textState": "visible",
+  "model": "google/gemini-3-flash-preview",
+  "globalPromptVersion": "global-v2",
+  "trials": 1,
+  "filter": {},
+  "startedAt": "2026-06-11T17:21:54.291Z",
+  "finishedAt": "2026-06-11T17:24:13.225Z"
+}

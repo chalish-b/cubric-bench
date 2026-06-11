@@ -1,0 +1,14 @@
+{
+  "runId": "2026-06-11-14-45-28_pll_identify_openrouter-owl-alpha_vtext",
+  "suiteId": "pll",
+  "suiteHash": "d0822c235ff7",
+  "taskId": "identify",
+  "image": false,
+  "textState": "visible",
+  "model": "openrouter/owl-alpha",
+  "globalPromptVersion": "global-v2",
+  "trials": 1,
+  "filter": {},
+  "startedAt": "2026-06-11T14:45:28.734Z",
+  "finishedAt": "2026-06-11T15:28:51.195Z"
+}

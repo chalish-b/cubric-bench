@@ -1,0 +1,17 @@
+{
+  "runId": "2026-06-11-17-53-39_pll_identify_openai-gpt-5.4_img-vtext_r-low",
+  "suiteId": "pll",
+  "suiteHash": "d0822c235ff7",
+  "taskId": "identify",
+  "image": true,
+  "textState": "visible",
+  "model": "openai/gpt-5.4",
+  "reasoningEffort": "low",
+  "globalPromptVersion": "global-v2",
+  "trials": 1,
+  "filter": {
+    "variant": "base"
+  },
+  "startedAt": "2026-06-11T17:53:39.210Z",
+  "finishedAt": "2026-06-11T18:00:49.069Z"
+}

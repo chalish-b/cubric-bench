@@ -4,7 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "generate:pll": "bun src/generate.ts"
+    "generate:pll": "bun src/generate/generate.ts",
+    "bench": "bun src/runner/run.ts",
+    "rescore": "bun src/runner/rescore.ts"
   },
   "dependencies": {
     "@cubric/cube": "workspace:*"

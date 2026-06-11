@@ -156,6 +156,20 @@ export function stringifyAlgorithm(algorithm: Move[]): string {
 export class Cube {
   state: CubeState = getDefaultState();
 
+  // Create a cube starting from an existing state (the state is cloned)
+  static fromState(state: CubeState): Cube {
+    const cube = new Cube();
+    cube.state = {
+      U: [...state.U],
+      R: [...state.R],
+      F: [...state.F],
+      D: [...state.D],
+      L: [...state.L],
+      B: [...state.B],
+    };
+    return cube;
+  }
+
   applyMove(move: Move | MoveString) {
     let m = typeof move === "string" ? parseMove(move) : move;
 
@@ -393,6 +407,8 @@ export class Cube {
   }
 
   isSolved(): boolean {
+    // TODO: This doesn't account for rotations.
+    // I think it's better to check whether each sticker on a face is equal to the center sticker.
     const d = getDefaultState();
     for (const face of ["U", "R", "F", "D", "L", "B"] as const) {
       for (let i = 0; i < 9; i++) {
@@ -422,4 +438,3 @@ export class Cube {
   // isValid() {}
 }
 
-// Helpers

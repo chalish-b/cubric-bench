@@ -1,0 +1,14 @@
+{
+  "runId": "2026-06-11-14-36-27_pll_identify_openai-gpt-oss-120b-free_vtext",
+  "suiteId": "pll",
+  "suiteHash": "d0822c235ff7",
+  "taskId": "identify",
+  "image": false,
+  "textState": "visible",
+  "model": "openai/gpt-oss-120b:free",
+  "globalPromptVersion": "global-v2",
+  "trials": 1,
+  "filter": {},
+  "startedAt": "2026-06-11T14:36:27.670Z",
+  "finishedAt": "2026-06-11T14:43:30.362Z"
+}

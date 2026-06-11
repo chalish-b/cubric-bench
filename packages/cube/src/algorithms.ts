@@ -1,6 +1,7 @@
 export type Algorithm = { name: string; algorithm: string };
 
 export const pllAlgorithms: Algorithm[] = [
+  // TODO: Make sure all of these have correct AUF at the end. It's important for the base case
   { name: "Aa", algorithm: "x R' U R' D2 R U' R' D2 R2 x'" },
   { name: "Ab", algorithm: "x R2 D2 R U R' D2 R U' R x'" },
   { name: "F", algorithm: "R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R" },
@@ -9,7 +10,7 @@ export const pllAlgorithms: Algorithm[] = [
   { name: "Gc", algorithm: "R2 U' R U' R U R' U R2 U D' R U' R' D" },
   { name: "Gd", algorithm: "R U R' U' D R2 U' R U' R' U R' U R2 D'" },
   { name: "Ja", algorithm: "x R2 F R F' R U2 r' U r U2 x'" },
-  { name: "Jb", algorithm: "R U R' F' R U R' U' R' F R2 U' R'" },
+  { name: "Jb", algorithm: "R U R' F' R U R' U' R' F R2 U' R' U'" },
   { name: "Ra", algorithm: "R U' R' U' R U R D R' U' R D' R' U2 R'" },
   { name: "Rb", algorithm: "R2 F R U R U' R' F' R U2 R' U2 R" },
   { name: "T", algorithm: "R U R' U' R' F R2 U' R' U' R U R' F'" },

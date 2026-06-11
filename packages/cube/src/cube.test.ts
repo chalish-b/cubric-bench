@@ -202,6 +202,18 @@ describe("Cube", () => {
     expect(cube.state.L.every((c) => c === Color.Orange)).toBe(true);
     expect(cube.state.B.every((c) => c === Color.Blue)).toBe(true);
   });
+
+  it("fromState clones the given state", () => {
+    const source = new Cube();
+    source.applyAlgorithm("R U R' U'");
+
+    const copy = Cube.fromState(source.state);
+    expect(copy.state).toEqual(source.state);
+
+    // Mutating the copy must not affect the source state
+    copy.applyMove("F");
+    expect(copy.state).not.toEqual(source.state);
+  });
 });
 
 describe("move identity: x4 = solved", () => {

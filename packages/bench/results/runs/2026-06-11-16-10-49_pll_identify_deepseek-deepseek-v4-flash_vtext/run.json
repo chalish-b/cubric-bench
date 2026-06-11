@@ -1,0 +1,13 @@
+{
+  "runId": "2026-06-11-16-10-49_pll_identify_deepseek-deepseek-v4-flash_vtext",
+  "suiteId": "pll",
+  "suiteHash": "d0822c235ff7",
+  "taskId": "identify",
+  "image": false,
+  "textState": "visible",
+  "model": "deepseek/deepseek-v4-flash",
+  "globalPromptVersion": "global-v2",
+  "trials": 1,
+  "filter": {},
+  "startedAt": "2026-06-11T16:10:49.715Z"
+}
