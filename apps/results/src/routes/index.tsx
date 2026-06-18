@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { loadSummary } from "@/lib/data";
-import { Leaderboard } from "@/components/Leaderboard";
+import { Dashboard } from "@/components/Dashboard";
 
 export const Route = createFileRoute("/")({
   loader: () => loadSummary(),
@@ -17,5 +17,5 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const summary = Route.useLoaderData();
-  return <Leaderboard summary={summary} />;
+  return <Dashboard summary={summary} />;
 }
