@@ -7,6 +7,10 @@
     "./algorithms": {
       "types": "./src/algorithms.ts",
       "import": "./src/algorithms.ts"
+    },
+    "./web": {
+      "types": "./src/web/schema.ts",
+      "import": "./src/web/schema.ts"
     }
   },
   "scripts": {
@@ -14,7 +18,8 @@
     "generate:scramble": "bun src/generate/generate-scramble.ts",
     "bench": "bun src/runner/run.ts",
     "batch": "bun src/runner/batch.ts",
-    "rescore": "bun src/runner/rescore.ts"
+    "rescore": "bun src/runner/rescore.ts",
+    "web:data": "bun src/web/build-data.ts"
   },
   "dependencies": {
     "@cubric/cube": "workspace:*"
