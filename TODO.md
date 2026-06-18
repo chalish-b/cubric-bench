@@ -51,8 +51,17 @@ Benchmark Ideas
     - Can identify models that can understand only 1 move, 2 moves, 3+ moves etc.
     - maybe this shouldn't even be multiple choice. just make it open ended
 
-### Data Analysis Ideas
+## Data Analysis Ideas
 
 - Showing total cost for a run, and average cost per test case, average tokens spent per test case.
+- For each run and case, include the 3D interactive cube so we can see the state of the cube given to the model. Basically make it possible to inspect every case with stuff like the prompt given to the model, the scramble (and 3d interactive cube state), model's answer, expected answer, etc.
+- Have a section / tab for each case: PLL Recognition, Simple Scramble etc. Currently we only have results for simple scramble so we can start with that.
+
+### PLL Specific Stuff (Not useful rn because we shifted the focus to simple scrambles)
+
 - The easiest and hardest algorithms: The ones with the highest and lowest correct answers. (T, H, Z, U seem to be easy to recognize)
 - The success rate between the base case vs. the AUF and rotated cases.
+
+### Scramble cases
+- We sum probably sum up all the results of 1+2+3 move scrambles to get a total score for each model.
+- We can dig deeper into how much models fall off as move count increases as a graph 

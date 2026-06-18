@@ -13,6 +13,7 @@
     "generate:pll": "bun src/generate/generate-pll.ts",
     "generate:scramble": "bun src/generate/generate-scramble.ts",
     "bench": "bun src/runner/run.ts",
+    "batch": "bun src/runner/batch.ts",
     "rescore": "bun src/runner/rescore.ts"
   },
   "dependencies": {

@@ -1,0 +1,17 @@
+{
+  "runId": "2026-06-18-19-31-04_scramble_solve_google-gemini-3-flash-preview_ftext_r-medium",
+  "suiteId": "scramble",
+  "suiteHash": "59df9d6bfb66",
+  "taskId": "solve",
+  "image": false,
+  "textState": "full",
+  "model": "google/gemini-3-flash-preview",
+  "reasoningEffort": "medium",
+  "globalPromptVersion": "global-v2",
+  "trials": 1,
+  "filter": {
+    "variant": "2"
+  },
+  "startedAt": "2026-06-18T19:31:04.988Z",
+  "finishedAt": "2026-06-18T19:34:03.641Z"
+}

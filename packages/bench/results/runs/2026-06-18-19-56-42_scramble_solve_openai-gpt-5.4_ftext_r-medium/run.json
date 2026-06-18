@@ -1,0 +1,17 @@
+{
+  "runId": "2026-06-18-19-56-42_scramble_solve_openai-gpt-5.4_ftext_r-medium",
+  "suiteId": "scramble",
+  "suiteHash": "59df9d6bfb66",
+  "taskId": "solve",
+  "image": false,
+  "textState": "full",
+  "model": "openai/gpt-5.4",
+  "reasoningEffort": "medium",
+  "globalPromptVersion": "global-v2",
+  "trials": 1,
+  "filter": {
+    "variant": "2"
+  },
+  "startedAt": "2026-06-18T19:56:42.967Z",
+  "finishedAt": "2026-06-18T20:00:48.679Z"
+}

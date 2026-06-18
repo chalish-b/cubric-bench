@@ -19,6 +19,7 @@ Key commands (bench scripts run with bun):
 - `pnpm --filter @cubric/bench generate:scramble [--moves 1,2,3] [--count 10]` — regenerate the scramble suite (text-only, no dev server)
 - `pnpm --filter @cubric/bench bench -- --suite pll --task identify --model <openrouter-id> [--no-image] [--text none|visible|full] [--reasoning none|minimal|low|medium|high|xhigh] [--variant V] [--limit N] [--dry-run]` (default modality: image + visible-faces text; text-only models run with `--no-image`; `--reasoning` omitted = model default)
 - The scramble suite is text-only, so run it with `--no-image --text full`, e.g. `pnpm --filter @cubric/bench bench -- --suite scramble --task solve --no-image --text full --model <id>`
+- `pnpm --filter @cubric/bench batch -- [config.ts] [--dry-run]` — run many selections in sequence from a config file (default `runs.config.ts`). The file default-exports a `BatchRun[]` (only suite/task/model required; everything else defaults to the CLI defaults). Each entry runs via the same `runBench` core as the CLI; a failed run is reported and the batch continues.
 - `pnpm --filter @cubric/bench rescore -- --run <runId>` — recompute outcomes from stored raw responses
 
 ## Things to keep in mind

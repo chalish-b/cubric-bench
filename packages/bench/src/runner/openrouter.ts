@@ -2,7 +2,7 @@
 // Reads OPENROUTER_API_KEY from the environment.
 
 const API_URL = "https://openrouter.ai/api/v1/chat/completions";
-const DEFAULT_TIMEOUT_MS = 300_000; // reasoning models can be slow
+const DEFAULT_TIMEOUT_MS = 500_000; // reasoning models can be slow
 const MAX_RETRIES = 3;
 // A model that times out once will usually time out again, and each attempt
 // blocks a worker slot for the full timeout — so timeouts get one retry only
