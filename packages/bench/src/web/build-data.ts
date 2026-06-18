@@ -14,6 +14,8 @@
 import { readdirSync, readFileSync, writeFileSync, mkdirSync, rmSync, existsSync } from "fs";
 import { resolve } from "path";
 import type { SuiteManifest, RunMeta, CaseResult, SuiteCase, TextState } from "../schema";
+import { composePrompt } from "../runner/prompts";
+import { stateTextBlock } from "../runner/state-text";
 import type {
   WebSummary,
   WebSuite,
@@ -258,6 +260,12 @@ for (const [entryId, runs] of entries) {
       variant,
       trial: res.trial,
       outcome: res.outcome,
+      prompt: composePrompt({
+        taskPrompt: task.prompt,
+        image: head.image,
+        textState: head.textState,
+        stateText: stateTextBlock(sc.cubeState, head.textState),
+      }),
       extracted: res.extracted,
       rawResponse: res.rawResponse,
       reasoning: res.reasoning,

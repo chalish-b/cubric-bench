@@ -92,6 +92,11 @@ export interface RunMeta {
   reasoningEffort?: string;
   /** Version id of the global prompt used (see runner/prompts.ts). */
   globalPromptVersion: string;
+  /** The static parts of the prompt sent to the model — shared by every case in
+   * the run (the per-case state text is composed from each case's cubeState).
+   * Absent on runs collected before this was recorded; backfill with
+   * `pnpm --filter @cubric/bench backfill-prompts`. */
+  prompt?: { global: string; task: string };
   trials: number;
   /** Case selection used for this run, recorded for reproducibility. */
   filter: {

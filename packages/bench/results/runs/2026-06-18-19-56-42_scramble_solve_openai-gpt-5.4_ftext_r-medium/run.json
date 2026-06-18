@@ -13,5 +13,9 @@
     "variant": "2"
   },
   "startedAt": "2026-06-18T19:56:42.967Z",
-  "finishedAt": "2026-06-18T20:00:48.679Z"
+  "finishedAt": "2026-06-18T20:00:48.679Z",
+  "prompt": {
+    "global": "You are given the sticker colors of all 6 faces of a standard 3x3 Rubik's cube as text.\n- The cube is in a valid state, there is no trickery.\n- You cannot write or evaluate code, only use your own reasoning.\n- After your reasoning, end your response with the answer on its own final line, with no extra commentary on that line.\n- If you believe the cube is in an invalid state, you are probably misreading the given state. Instead of going in circles, you may give up by answering exactly \"Q\".",
+    "task": "This cube was scrambled with a few moves from a solved state. It could be 1 move, 2 moves, or more, you're not given that information. Find the sequence of moves that would return this cube to a fully solved state (every face a single solid color — any orientation counts). Use standard notation (e.g. R U R' U2), with moves separated by spaces. Your final answer should just be a single line containing the sequence of moves, nothing else."
+  }
 }

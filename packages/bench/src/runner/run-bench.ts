@@ -12,7 +12,7 @@ import {
 } from "fs";
 import { resolve } from "path";
 import type { SuiteManifest, SuiteCase, RunMeta, CaseResult, TextState } from "../schema";
-import { GLOBAL_PROMPT_VERSION, composePrompt } from "./prompts";
+import { GLOBAL_PROMPT_VERSION, composePrompt, promptScaffold } from "./prompts";
 import { stateTextBlock } from "./state-text";
 import { extractAnswer } from "./extract";
 import { scoreAnswer } from "./score";
@@ -214,6 +214,7 @@ export async function runBench(config: RunConfig): Promise<RunSummary> {
       model,
       ...(reasoningEffort ? { reasoningEffort } : {}),
       globalPromptVersion: GLOBAL_PROMPT_VERSION,
+      prompt: promptScaffold(image, textState, task.prompt),
       trials,
       filter: {
         ...(variant ? { variant } : {}),

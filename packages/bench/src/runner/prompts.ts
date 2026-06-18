@@ -69,3 +69,13 @@ export function composePrompt(opts: {
     .filter(Boolean)
     .join("\n\n");
 }
+
+/** The static parts of the prompt, shared by every case in a run. The per-case
+ * state text is composed separately from each case's cubeState. */
+export function promptScaffold(
+  image: boolean,
+  textState: TextState,
+  taskPrompt: string,
+): { global: string; task: string } {
+  return { global: globalPrompt(image, textState), task: taskPrompt };
+}

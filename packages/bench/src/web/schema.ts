@@ -80,6 +80,8 @@ export interface WebCaseDetail {
   variant: string;
   trial: number;
   outcome: Outcome;
+  /** Full prompt sent for this case (shared scaffold + this case's state text). */
+  prompt: string;
   /** The model's answer (extracted) and full response. */
   extracted: string;
   rawResponse: string;
