@@ -112,6 +112,13 @@ if (args.variant) cases = cases.filter((c) => c.variant === args.variant);
 if (args.limit) cases = cases.slice(0, Number(args.limit));
 if (cases.length === 0) fail("Case selection matched no cases");
 
+// Text-only suites ship no screenshots, so image input isn't possible.
+if (image && cases.some((c) => !c.image)) {
+  fail(
+    `Suite "${suite.suiteId}" has cases without screenshots (text-only). Re-run with --no-image (and --text full).`,
+  );
+}
+
 function promptForCase(c: SuiteCase): string {
   return composePrompt({
     taskPrompt: task!.prompt,
@@ -248,8 +255,9 @@ async function runJob({ suiteCase, trial }: Job): Promise<void> {
       ...(reasoningEffort ? { reasoningEffort } : {}),
       ...(image
         ? {
+            // image=true is guarded above to require a screenshot per case
             imageBase64: readFileSync(
-              resolve(suiteDir, suiteCase.image),
+              resolve(suiteDir, suiteCase.image!),
             ).toString("base64"),
           }
         : {}),

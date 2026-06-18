@@ -1,12 +1,19 @@
 import { chromium, type Browser, type Page } from "playwright";
-import type { PllCase } from "./pll-cases";
+import type { CubeState } from "@cubric/cube";
 
 const VIEWPORT = { width: 512, height: 512 };
 
+/** Minimal case shape the renderer needs. */
+export interface RenderableCase {
+  id: string;
+  cubeState: CubeState;
+  cameraPosition: [number, number, number];
+}
+
 function buildUrl(
   baseUrl: string,
-  cubeState: PllCase["cubeState"],
-  cameraPosition: PllCase["cameraPosition"],
+  cubeState: CubeState,
+  cameraPosition: [number, number, number],
 ): string {
   const params = new URLSearchParams({
     state: JSON.stringify(cubeState),
@@ -30,7 +37,7 @@ async function waitForReady(page: Page) {
 }
 
 export async function captureScreenshots(
-  cases: PllCase[],
+  cases: RenderableCase[],
   outputDir: string,
   port: number,
 ): Promise<void> {

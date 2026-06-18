@@ -33,16 +33,20 @@ export interface TaskDef {
 
 export interface SuiteCase {
   id: string;
-  /** Path of the screenshot, relative to the suite directory. */
-  image: string;
-  /** Generation variant, e.g. "base" vs "random" (AUF/rotation variants). */
+  /** Path of the screenshot, relative to the suite directory.
+   * Absent for text-only suites (run those with --no-image). */
+  image?: string;
+  /** Generation variant — suite-specific, e.g. PLL y-view ("base"/"y"/...)
+   * or scramble move count ("1"/"2"/...). Selectable at run time via --variant. */
   variant: string;
-  /** Accepted answers for "exact" scoring tasks. */
+  /** Accepted answers for "exact" scoring tasks (empty for "solve" tasks). */
   accept: string[];
   cubeState: CubeState;
-  /** Algorithm that produces cubeState from a solved (x2, yellow-top) cube. */
+  /** Algorithm that produces cubeState from a solved cube. Never shown to the
+   * model — recorded so a case can be traced back to how it was generated. */
   setup: string;
-  cameraPosition: [number, number, number];
+  /** Camera used to render the screenshot. Absent for text-only suites. */
+  cameraPosition?: [number, number, number];
 }
 
 export interface SuiteManifest {

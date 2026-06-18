@@ -10,7 +10,8 @@
     }
   },
   "scripts": {
-    "generate:pll": "bun src/generate/generate.ts",
+    "generate:pll": "bun src/generate/generate-pll.ts",
+    "generate:scramble": "bun src/generate/generate-scramble.ts",
     "bench": "bun src/runner/run.ts",
     "rescore": "bun src/runner/rescore.ts"
   },
