@@ -10,6 +10,9 @@ importers:
 
   apps/cube-demo:
     dependencies:
+      '@cubric/bench':
+        specifier: workspace:*
+        version: link:../../packages/bench
       '@cubric/cube':
         specifier: workspace:*
         version: link:../../packages/cube

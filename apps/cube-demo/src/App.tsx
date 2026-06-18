@@ -89,7 +89,7 @@ function FaceStickers({
 const GHOST_DISTANCE = 2.0;
 const LABEL_DISTANCE = 1.5;
 
-function VisualCube({
+export function VisualCube({
   state,
   showGhosts,
 }: {

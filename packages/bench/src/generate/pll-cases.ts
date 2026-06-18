@@ -1,62 +1,41 @@
 import {
   Cube,
-  pllAlgorithms,
   parseAlgorithm,
   invertAlgorithm,
   stringifyAlgorithm,
   type CubeState,
 } from "@cubric/cube";
+import { pllAlgorithms } from "../algorithms";
 import { mulberry32, hashString } from "./seed-random";
 
 export interface PllCase {
   id: string;
   pllName: string;
-  variant: "base" | "random";
+  /** Which view this case shows: "base" plus the three y-rotations. */
+  variant: string;
   accept: string[];
   cubeState: CubeState;
   setup: string;
   cameraPosition: [number, number, number];
 }
 
-const RANDOM_VARIANTS = 3;
-
-const PRE_AUFS = ["U", "U'", "U2"] as const;
-const Y_ROTATIONS = ["y", "y'", "y2"] as const;
-
-function pick<T>(arr: readonly T[], rng: () => number): T {
-  return arr[Math.floor(rng() * arr.length)];
-}
+// Each PLL is shown from 4 angles: the tuned base case, then y / y2 / y' to
+// rotate the cube and reveal the other side-face pairs. No AUF variants — the
+// base case is already the intuitive, recognizable presentation, and y moves
+// test recognition robustness across viewing angles (the axis that matters).
+const Y_VIEWS = [
+  { label: "base", rot: "" },
+  { label: "y", rot: "y" },
+  { label: "y2", rot: "y2" },
+  { label: "yprime", rot: "y'" },
+] as const;
 
 /** Apply the setup algorithm to a yellow-top cube and return the resulting state. */
 function applySetup(setup: string): CubeState {
   const cube = new Cube();
   cube.applyAlgorithm("x2"); // yellow on top
-  cube.applyAlgorithm(setup);
+  if (setup.trim()) cube.applyAlgorithm(setup);
   return cube.getStateClone();
-}
-
-/** Try to find a unique (preAuf, yRot) combo that produces a state not in seenStates. */
-function pickUniqueVariant(
-  inversePll: string,
-  seenStates: Set<string>,
-  rng: () => number,
-): { preAuf: string; yRot: string } | null {
-  for (let attempt = 0; attempt < 20; attempt++) {
-    // AUF before the algorithm changes which PLL pattern variant is shown
-    // y-rotation after changes the viewing angle (which faces are visible)
-    const preAuf = rng() < 0.75 ? pick(PRE_AUFS, rng) : "";
-    const yRot = rng() < 0.75 ? pick(Y_ROTATIONS, rng) : "";
-    if (!preAuf && !yRot) continue;
-
-    const setup = [preAuf, inversePll, yRot].filter(Boolean).join(" ");
-    const stateKey = JSON.stringify(applySetup(setup));
-
-    if (!seenStates.has(stateKey)) {
-      seenStates.add(stateKey);
-      return { preAuf, yRot };
-    }
-  }
-  return null;
 }
 
 // Base camera distance. lower = more zoomed in
@@ -76,48 +55,31 @@ function makeCameraPosition(rng: () => number): [number, number, number] {
 
 export function generatePllCases(): PllCase[] {
   const cases: PllCase[] = [];
-  let globalIndex = 0;
 
   for (const pll of pllAlgorithms) {
-    const inversePll = stringifyAlgorithm(
+    const inverse = stringifyAlgorithm(
       invertAlgorithm(parseAlgorithm(pll.algorithm)),
     );
 
-    // Base case: no AUF, no y-rotation
-    globalIndex++;
-    const baseId = `pll-${pll.name}-${String(globalIndex).padStart(2, "0")}`;
-    const baseRng = mulberry32(hashString(baseId));
-    const baseCubeState = applySetup(inversePll);
-    cases.push({
-      id: baseId,
-      pllName: pll.name,
-      variant: "base",
-      accept: [pll.name],
-      cubeState: baseCubeState,
-      setup: inversePll,
-      cameraPosition: makeCameraPosition(baseRng),
-    });
+    // Symmetric PLLs (H, Z, N) produce visually identical states for some
+    // y-views — dedupe so we don't ship duplicate images as separate cases.
+    const seenStates = new Set<string>();
 
-    // Random variants: random AUF and/or y-rotation, deduplicated
-    const seenStates = new Set([JSON.stringify(baseCubeState)]);
-    const variantRng = mulberry32(hashString(`${pll.name}-variants`));
+    for (const view of Y_VIEWS) {
+      const setup = [inverse, view.rot].filter(Boolean).join(" ");
+      const cubeState = applySetup(setup);
 
-    for (let v = 0; v < RANDOM_VARIANTS; v++) {
-      const variant = pickUniqueVariant(inversePll, seenStates, variantRng);
-      if (!variant) continue;
+      const stateKey = JSON.stringify(cubeState);
+      if (seenStates.has(stateKey)) continue;
+      seenStates.add(stateKey);
 
-      globalIndex++;
-      const id = `pll-${pll.name}-${String(globalIndex).padStart(2, "0")}`;
-      const setup = [variant.preAuf, inversePll, variant.yRot]
-        .filter(Boolean)
-        .join(" ");
-
+      const id = `pll-${pll.name}-${view.label}`;
       cases.push({
         id,
         pllName: pll.name,
-        variant: "random",
+        variant: view.label,
         accept: [pll.name],
-        cubeState: applySetup(setup),
+        cubeState,
         setup,
         cameraPosition: makeCameraPosition(mulberry32(hashString(id))),
       });

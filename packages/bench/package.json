@@ -3,6 +3,12 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "exports": {
+    "./algorithms": {
+      "types": "./src/algorithms.ts",
+      "import": "./src/algorithms.ts"
+    }
+  },
   "scripts": {
     "generate:pll": "bun src/generate/generate.ts",
     "bench": "bun src/runner/run.ts",

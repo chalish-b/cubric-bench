@@ -10,12 +10,12 @@
  */
 import {
   Cube,
-  pllAlgorithms,
   parseAlgorithm,
   invertAlgorithm,
   stringifyAlgorithm,
   type CubeState,
 } from "@cubric/cube";
+import { pllAlgorithms } from "../algorithms";
 
 const AUFS = ["", "U", "U'", "U2"] as const;
 const YS = ["", "y", "y'", "y2"] as const;
