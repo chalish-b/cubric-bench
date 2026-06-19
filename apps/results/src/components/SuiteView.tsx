@@ -25,8 +25,13 @@ export function SuiteView({
       <p className="max-w-2xl text-sm text-muted-foreground">{meta.blurb}</p>
 
       <section>
-        <div className="mb-4 flex items-center justify-between gap-4">
-          <h3 className="text-sm font-semibold">Accuracy</h3>
+        <div className="mb-4 flex items-end justify-between gap-4">
+          <div>
+            <h3 className="text-sm font-semibold">Accuracy</h3>
+            <p className="mt-0.5 text-xs text-muted-foreground">
+              Click a model to inspect its cases.
+            </p>
+          </div>
           <ToggleGroup
             type="single"
             size="sm"

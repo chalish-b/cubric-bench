@@ -1,4 +1,5 @@
 import type { WebEntry } from "@cubric/bench/web";
+import { useNavigate } from "@tanstack/react-router";
 import { Bar, BarChart, Cell, LabelList, XAxis, YAxis } from "recharts";
 import { ChartContainer, ChartTooltip } from "@/components/ui/chart";
 import { ModelLabel } from "@/components/ModelLabel";
@@ -61,6 +62,9 @@ export function AccuracyChart({
   entries: WebEntry[];
   variant: string | null;
 }) {
+  const navigate = useNavigate();
+  const open = (entryId: string) =>
+    navigate({ to: "/entry/$entryId", params: { entryId } });
   const rows = entries
     .map((e) => toRow(e, variant))
     .sort((a, b) => b.accuracy - a.accuracy);
@@ -70,7 +74,7 @@ export function AccuracyChart({
   return (
     <ChartContainer
       config={{ accuracy: { label: "Accuracy" } }}
-      className="aspect-auto! w-full"
+      className="aspect-auto! w-full [&_.recharts-wrapper]:cursor-pointer!"
       style={{ height }}
     >
       <BarChart
@@ -78,6 +82,16 @@ export function AccuracyChart({
         layout="vertical"
         margin={{ top: 4, right: 104, bottom: 4, left: 8 }}
         barCategoryGap="30%"
+        onClick={(state: {
+          activeTooltipIndex?: unknown;
+          activePayload?: readonly { payload?: Row }[];
+        }) => {
+          const idx = Number(state?.activeTooltipIndex);
+          const id =
+            state?.activePayload?.[0]?.payload?.entryId ??
+            (Number.isInteger(idx) ? rows[idx]?.entryId : undefined);
+          if (id) open(id);
+        }}
       >
         <XAxis type="number" domain={[0, 100]} hide />
         <YAxis
@@ -87,7 +101,9 @@ export function AccuracyChart({
           tickLine={false}
           axisLine={false}
           interval={0}
-          tick={(props: AxisTickProps) => <ModelTick {...props} rows={byId} />}
+          tick={(props: AxisTickProps) => (
+            <ModelTick {...props} rows={byId} onOpen={open} />
+          )}
         />
         <ChartTooltip
           cursor={{ fill: "var(--muted)", opacity: 0.5 }}
@@ -118,14 +134,24 @@ function ModelTick({
   y,
   payload,
   rows,
-}: AxisTickProps & { rows: Map<string, Row> }) {
+  onOpen,
+}: AxisTickProps & {
+  rows: Map<string, Row>;
+  onOpen: (entryId: string) => void;
+}) {
   const r = payload ? rows.get(payload.value) : undefined;
   const px = Number(x);
   const py = Number(y);
   if (!r || Number.isNaN(px) || Number.isNaN(py)) return <g />;
   return (
     <foreignObject x={px - LABEL_WIDTH} y={py - 18} width={LABEL_WIDTH - 8} height={36}>
-      <div className="flex h-9 items-center">
+      <div
+        className="flex h-9 items-center"
+        onClick={(e) => {
+          e.stopPropagation();
+          onOpen(r.entryId);
+        }}
+      >
         <ModelLabel
           provider={r.provider}
           name={r.name}

@@ -19,7 +19,6 @@
     "bench": "bun src/runner/run.ts",
     "batch": "bun src/runner/batch.ts",
     "rescore": "bun src/runner/rescore.ts",
-    "backfill-prompts": "bun src/runner/backfill-prompts.ts",
     "web:data": "bun src/web/build-data.ts"
   },
   "dependencies": {
