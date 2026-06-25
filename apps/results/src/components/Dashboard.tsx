@@ -2,6 +2,7 @@ import type { WebSummary } from "@cubric/bench/web";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SuiteView } from "@/components/SuiteView";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GitHubLink } from "@/components/GitHubLink";
 import { suiteMeta } from "@/lib/suites";
 
 export function Dashboard({ summary }: { summary: WebSummary }) {
@@ -18,7 +19,10 @@ export function Dashboard({ summary }: { summary: WebSummary }) {
             How well can LLMs reason about Rubik&apos;s cube states?
           </p>
         </div>
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          <GitHubLink />
+          <ThemeToggle />
+        </div>
       </header>
 
       {suites.length === 0 ? (

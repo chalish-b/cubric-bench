@@ -3,6 +3,7 @@ import { Link } from "@tanstack/react-router";
 import { ChevronLeft } from "lucide-react";
 import { ProviderLogo } from "@/components/ProviderLogo";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { GitHubLink } from "@/components/GitHubLink";
 import { PeerFalloffChart } from "@/components/PeerFalloffChart";
 import { CaseBrowser } from "@/components/CaseBrowser";
 import { providerColor } from "@/lib/providers";
@@ -50,7 +51,10 @@ export function RunDetail({
           <ChevronLeft className="size-4" />
           Back
         </Link>
-        <ThemeToggle />
+        <div className="flex items-center gap-1">
+          <GitHubLink />
+          <ThemeToggle />
+        </div>
       </div>
 
       <header className="mb-8 flex flex-wrap items-start justify-between gap-6">
